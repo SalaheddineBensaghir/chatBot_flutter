@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-//sk-proj-6IPTNKlsfwMmBXumGKupT3BlbkFJmOUj1tzKDNDixqWHRKOE
 class ChatBotPage extends StatefulWidget {
   ChatBotPage({super.key});
 
@@ -107,7 +107,7 @@ class _ChatBotPageState extends State<ChatBotPage> {
                       Map<String, String> headers = {
                         "Content-Type": "application/json",
                         "Authorization":
-                            "Bearer sk-proj-6IPTNKlsfwMmBXumGKupT3BlbkFJmOUj1tzKDNDixqWHRKOE"
+                            "Bearer ${dotenv.env['OPENAI_API_KEY']}"
                       };
                       var prompt = {
                         "model": "gpt-3.5-turbo",
@@ -116,29 +116,28 @@ class _ChatBotPageState extends State<ChatBotPage> {
                         ],
                         "temperature": 0.7
                       };
-                      // http
-                      //     .post( openAiUri,
-                      //         headers: headers, body: json.encode(prompt))
-                      //     .then( (resp) {
-                      //   var responseBody = resp.body;
-                      //   var chatResponse = json.decode(responseBody);
-                      //   String responseContent =
-                      //       chatResponse['choices'][0]['message']['content'];
-                      setState(() {
-                        // message.add({
-                        //   "message": question,
-                        //   "type": "user",
-                        // });
-                        scrollController.jumpTo(
-                            scrollController.position.maxScrollExtent + 100);
-                        message.add({
-                          "message": question,
-                          "type": "assistant",
+                      http
+                          .post(openAiUri,
+                              headers: headers, body: json.encode(prompt))
+                          .then((resp) {
+                        var responseBody = resp.body;
+                        var chatResponse = json.decode(responseBody);
+                        String responseContent =
+                            chatResponse['choices'][0]['message']['content'];
+                        setState(() {
+                          message.add({
+                            "message": question,
+                            "type": "user",
+                          });
+                          scrollController.jumpTo(
+                              scrollController.position.maxScrollExtent + 100);
+                          message.add({
+                            "type": "assistant",
+                          });
                         });
-                        // });
-                        //   }, onError: (err) {
-                        //     print("----- Erreur ----");
-                        //     print(err);
+                      }, onError: (err) {
+                        print("----- Erreur ----");
+                        print(err);
                       });
                     },
                     icon: Icon(Icons.send)),
